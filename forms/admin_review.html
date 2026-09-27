@@ -1,0 +1,55 @@
+  <style>
+    .task-form { font-family: sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; color: #333; }
+    h2 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 8px; }
+    .info-card { background: #f8f9fa; border-left: 4px solid #3498db; padding: 16px; border-radius: 4px; margin-bottom: 24px; }
+    .info-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 14px; }
+    .info-label { font-weight: bold; min-width: 100px; color: #555; }
+    label { display: block; margin-top: 16px; font-weight: bold; font-size: 14px; }
+    textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+    .decision-group { display: flex; gap: 12px; margin-top: 8px; }
+    .decision-option { flex: 1; }
+    .decision-option input[type="radio"] { display: none; }
+    .decision-option label { display: block; text-align: center; padding: 12px; border: 2px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: normal; margin: 0; transition: all 0.2s; }
+    .decision-option input[type="radio"]:checked + label.approve { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+    .decision-option input[type="radio"]:checked + label.return { border-color: #f39c12; background: #fef9e7; color: #f39c12; }
+    .decision-option input[type="radio"]:checked + label.reject { border-color: #e74c3c; background: #fdedec; color: #e74c3c; }
+    .section-title { font-weight: bold; color: #555; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    button[type="submit"] { margin-top: 24px; width: 100%; padding: 12px; background: #e67e22; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    button[type="submit"]:hover { background: #d35400; }
+  </style>
+  <section class="task-form">
+  <h2>Admin Review & Dispatch</h2>
+  <div class="info-card">
+    <div class="section-title">Request Details</div>
+    <div class="info-row"><span class="info-label">Location:</span><span class="location">—</span></div>
+    <div class="info-row"><span class="info-label">Room:</span><span class="room">—</span></div>
+    <div class="info-row"><span class="info-label">Category:</span><span class="category">—</span></div>
+    <div class="info-row"><span class="info-label">Description:</span><span class="description">—</span></div>
+    <div class="info-row"><span class="info-label">Urgency:</span><span class="urgency">—</span></div>
+  </div>
+  <label>Decision</label>
+  <div class="decision-group">
+    <div class="decision-option">
+      <input form="worklist-form" type="radio" id="approve" name="admin_decision" value="approved" required>
+      <label for="approve" class="approve">Approve</label>
+    </div>
+    <div class="decision-option">
+      <input form="worklist-form" type="radio" id="reject" name="admin_decision" value="rejected">
+      <label for="reject" class="reject">Reject</label>
+    </div>
+  </div>
+  <div>
+    <label for="admin-note">Note to student</label>
+    <textarea form="worklist-form" id="admin-note" name="admin_note" rows="3" placeholder="Optional Note for students
+."></textarea>
+  </div>
+  <button form="worklist-form" type="submit">Submit Decision</button>
+  </section>
+  <worklist-form-load>
+    $(".location").text(data.location || "—");
+    $(".room").text(data.room || "—");
+    $(".category").text(data.category || "—");
+    $(".description").text(data.description || "—");
+    $(".urgency").text(data.urgency || "—");
+    $("#admin-note").val(data.admin_note || "");
+  </worklist-form-load>

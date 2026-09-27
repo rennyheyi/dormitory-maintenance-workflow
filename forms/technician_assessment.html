@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/worklist.css">
+
+<worklist-form-load>
+  $('.location').text(data.location || '—');
+  $('.room').text(data.room || '—');
+  $('.category').text(data.category || '—');
+  $('.description').text(data.description || '—');
+  $('.urgency').text(data.urgency || '—');
+  $('[name="materials_list"]').val(data.materials_list || '');
+  $('[name="assessment_notes"]').val(data.assessment_notes || '');
+</worklist-form-load>
+
+<section class="task-form">
+  <h2>On-site Assessment</h2>
+
+  <div class="details">
+    <p><strong>Location:</strong> <span class="location"></span></p>
+    <p><strong>Room:</strong> <span class="room"></span></p>
+    <p><strong>Category:</strong> <span class="category"></span></p>
+    <p><strong>Description:</strong> <span class="description"></span></p>
+    <p><strong>Urgency:</strong> <span class="urgency"></span></p>
+  </div>
+
+  <label>Are materials required?</label>
+  <div class="options">
+    <label><input form="worklist-form" name="materials_needed" type="radio" value="true" required> Yes</label>
+    <label><input form="worklist-form" name="materials_needed" type="radio" value="false"> No</label>
+  </div>
+
+  <label for="materials_list">Required materials</label>
+  <textarea form="worklist-form" id="materials_list" name="materials_list" rows="3"></textarea>
+
+  <label for="assessment_notes">Assessment notes</label>
+  <textarea form="worklist-form" id="assessment_notes" name="assessment_notes" rows="4" required></textarea>
+
+  <button form="worklist-form" type="submit">Submit assessment</button>
+</section>

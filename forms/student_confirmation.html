@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/worklist.css">
+
+<worklist-form-load>
+  $('.location').text(data.location || '—');
+  $('.room').text(data.room || '—');
+  $('.category').text(data.category || '—');
+  $('.repair-notes').text(data.repair_notes || '—');
+</worklist-form-load>
+
+<section class="task-form">
+  <h2>Confirm Repair</h2>
+
+  <div class="details">
+    <p><strong>Location:</strong> <span class="location"></span></p>
+    <p><strong>Room:</strong> <span class="room"></span></p>
+    <p><strong>Category:</strong> <span class="category"></span></p>
+    <p><strong>Repair notes:</strong> <span class="repair-notes"></span></p>
+  </div>
+
+  <label>Is the issue resolved?</label>
+  <div class="options">
+    <label><input form="worklist-form" name="satisfied" type="radio" value="true" required> Yes</label>
+    <label><input form="worklist-form" name="satisfied" type="radio" value="false"> No</label>
+  </div>
+
+  <label for="rating">Rating</label>
+  <select form="worklist-form" id="rating" name="rating" required>
+    <option value="">Select a rating</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+  </select>
+
+  <label for="feedback">Feedback</label>
+  <textarea form="worklist-form" id="feedback" name="feedback" rows="3"></textarea>
+
+  <button form="worklist-form" type="submit">Submit confirmation</button>
+</section>

@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements>
+    <location>&#x201C;&#x201D;</location>
+    <room>&#x201C;&#x201D;</room>
+    <urgency>&#x201C;&#x201D;</urgency>
+    <category>&#x201C;&#x201D;</category>
+    <description>&#x201C;&#x201D;</description>
+  </dataelements>
+  <documents/>
+  <endpoints>
+    <user>https-post://cpee.org/services/timeout-user.php</user>
+    <auto>https-post://cpee.org/services/timeout-auto.php</auto>
+    <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+    <timeout>https-post://cpee.org/services/timeout.php</timeout>
+    <send>https-post://cpee.org/ing/correlators/message/send/</send>
+    <receive>https-get://cpee.org/ing/correlators/message/receive/</receive>
+    <worklist>https-post://cpee.org/worklist/server/</worklist>
+  </endpoints>
+  <attributes>
+    <info>Main-Sync</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <modeltype>CPEE</modeltype>
+    <guarded>none</guarded>
+    <guarded_id/>
+    <model_uuid>9f6b912f-09c3-4a2c-907e-f513793f14d5</model_uuid>
+    <model_version/>
+    <theme>extended</theme>
+    <design_dir>Teaching.dir/Prak.dir/TUM-Prak-26-SS.dir/XuRenyi.dir</design_dir>
+    <design_stage>development</design_stage>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0">
+      <loop eid="e5" mode="post_test" condition="true">
+        <_probability>
+          <_probability_min/>
+          <_probability_max/>
+          <_probability_avg/>
+        </_probability>
+        <_annotations>
+          <_generic/>
+          <_logging_behavior>
+            <_iteration>false</_iteration>
+          </_logging_behavior>
+        </_annotations>
+        <call id="a1" endpoint="worklist">
+          <parameters>
+            <label>Student submits request</label>
+            <color/>
+            <arguments>
+              <orgmodel>https://lehre.bpm.in.tum.de/~go34sat/prak26/org/organisation.xml</orgmodel>
+              <form>https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/student_request.html</form>
+              <role>Student</role>
+              <priority>1</priority>
+              <handling>single</handling>
+              <restrictions/>
+              <data>
+                <location>!data.location</location>
+                <category>!data.category</category>
+                <description>!data.description</description>
+                <urgency>!data.urgency</urgency>
+                <room>!data.room</room>
+              </data>
+            </arguments>
+          </parameters>
+          <code>
+            <signal>false</signal>
+            <prepare/>
+            <finalize output="result">form = result["raw"].to_h { |field| [field["name"], field["value"]] }
+data.location = form["location"]
+data.room = form["room"]
+data.category = form["category"]
+data.description = form["description"]
+data.urgency = form["urgency"]</finalize>
+            <update output="result"/>
+            <rescue output="result"/>
+          </code>
+          <annotations>
+            <_generic/>
+            <_logging_behavior>
+              <_exclude>false</_exclude>
+              <_include>false</_include>
+            </_logging_behavior>
+            <_timing>
+              <_timing_weight/>
+              <_timing_avg/>
+              <explanations/>
+            </_timing>
+            <_shifting>
+              <_shifting_type>Duration</_shifting_type>
+            </_shifting>
+            <_context_data_analysis>
+              <probes/>
+              <ips/>
+            </_context_data_analysis>
+            <report>
+              <url/>
+            </report>
+            <_notes>
+              <_notes_general/>
+            </_notes>
+          </annotations>
+          <documentation>
+            <input/>
+            <output/>
+            <implementation>
+              <description/>
+            </implementation>
+            <code>
+              <description/>
+            </code>
+          </documentation>
+        </call>
+        <call id="a3" endpoint="subprocess">
+          <parameters>
+            <label>Handle maintenance request</label>
+            <color/>
+            <arguments>
+              <behavior>wait_running</behavior>
+              <url>https://cpee.org/hub/server/Teaching.dir/Prak.dir/TUM-Prak-26-SS.dir/XuRenyi.dir/Dormitory%20Maintenance%20Worklist%20System.xml</url>
+              <init>
+                <location>!data.location</location>
+                <room>!data.room</room>
+                <category>!data.category</category>
+                <description>!data.description</description>
+                <urgency>!data.urgency</urgency>
+              </init>
+              <endpoints/>
+              <attributes/>
+              <customization/>
+            </arguments>
+          </parameters>
+          <annotations>
+            <_generic/>
+            <_logging_behavior>
+              <_exclude>false</_exclude>
+              <_include>false</_include>
+            </_logging_behavior>
+            <_timing>
+              <_timing_weight/>
+              <_timing_avg/>
+              <explanations/>
+            </_timing>
+            <_shifting>
+              <_shifting_type>Duration</_shifting_type>
+            </_shifting>
+            <_context_data_analysis>
+              <probes/>
+              <ips/>
+            </_context_data_analysis>
+            <report>
+              <url/>
+            </report>
+            <_notes>
+              <_notes_general/>
+            </_notes>
+          </annotations>
+          <documentation>
+            <input/>
+            <output/>
+            <implementation>
+              <description/>
+            </implementation>
+          </documentation>
+        </call>
+      </loop>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+</testset>

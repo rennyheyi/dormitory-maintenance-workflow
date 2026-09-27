@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements>
+    <queue>[]</queue>
+    <item>{"location":"Garching","room":"1","category":"Plumbing","description":"1","urgency":"Low"}</item>
+  </dataelements>
+  <documents/>
+  <endpoints>
+    <user>https-post://cpee.org/services/timeout-user.php</user>
+    <auto>https-post://cpee.org/services/timeout-auto.php</auto>
+    <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+    <timeout>https-post://cpee.org/services/timeout.php</timeout>
+    <send>https-post://cpee.org/ing/correlators/message/send/</send>
+    <receive>https-get://cpee.org/ing/correlators/message/receive/</receive>
+    <worklist>https-post://cpee.org/worklist/server/</worklist>
+  </endpoints>
+  <attributes>
+    <info>Main-Async</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <modeltype>CPEE</modeltype>
+    <guarded>none</guarded>
+    <guarded_id/>
+    <model_uuid>9f6b912f-09c3-4a2c-907e-f513793f14d5</model_uuid>
+    <model_version/>
+    <theme>extended</theme>
+    <design_dir>Teaching.dir/Prak.dir/TUM-Prak-26-SS.dir/XuRenyi.dir/</design_dir>
+    <design_stage>development</design_stage>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0">
+      <parallel eid="e1" wait="-1" cancel="last">
+        <parallel_branch eid="e2">
+          <call id="a2" endpoint="worklist">
+            <parameters>
+              <label>Student submits request</label>
+              <color/>
+              <arguments>
+                <orgmodel>https://lehre.bpm.in.tum.de/~go34sat/prak26/org/organisation.xml</orgmodel>
+                <form>https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/student_request.html</form>
+                <role>Student</role>
+                <priority>1</priority>
+                <handling>always</handling>
+                <restrictions/>
+                <data>
+                  <location>!""</location>
+                  <category>!""</category>
+                  <description>!""</description>
+                  <urgency>!""</urgency>
+                  <room>!""</room>
+                </data>
+              </arguments>
+            </parameters>
+            <code>
+              <signal>false</signal>
+              <prepare/>
+              <finalize output="result"/>
+              <update output="result">form = result["raw"].to_h { |field| [field["name"], field["value"]] }
+
+
+data.queue.push({
+  "location" =&gt; form["location"],
+  "room" =&gt; form["room"],
+  "category" =&gt; form["category"],
+  "description" =&gt; form["description"],
+  "urgency" =&gt; form["urgency"]
+})</update>
+              <rescue output="result"/>
+            </code>
+            <annotations>
+              <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight/>
+                <_timing_avg/>
+                <explanations/>
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes/>
+                <ips/>
+              </_context_data_analysis>
+              <report>
+                <url/>
+              </report>
+              <_notes>
+                <_notes_general/>
+              </_notes>
+            </annotations>
+            <documentation>
+              <input/>
+              <output/>
+              <implementation>
+                <description/>
+              </implementation>
+              <code>
+                <description/>
+              </code>
+            </documentation>
+          </call>
+        </parallel_branch>
+        <parallel_branch eid="e3">
+          <loop eid="e4" mode="post_test" condition="true">
+            <_probability>
+              <_probability_min/>
+              <_probability_max/>
+              <_probability_avg/>
+            </_probability>
+            <_annotations>
+              <_generic/>
+              <_logging_behavior>
+                <_iteration>false</_iteration>
+              </_logging_behavior>
+            </_annotations>
+            <choose eid="e6" mode="exclusive" label="">
+              <alternative eid="e7" condition="data.queue.length &gt; 0">
+                <manipulate id="a4" label="Take next request">
+                  <code>data.item = data.queue.shift</code>
+                  <annotations>
+                    <_logging_behavior>
+                      <_exclude>false</_exclude>
+                    </_logging_behavior>
+                    <_context_data_analysis>
+                      <probes/>
+                    </_context_data_analysis>
+                  </annotations>
+                </manipulate>
+                <call id="a5" endpoint="subprocess">
+                  <parameters>
+                    <label>Start maintenance process</label>
+                    <color/>
+                    <arguments>
+                      <behavior>fork_running</behavior>
+                      <url>https://cpee.org/hub/server/Teaching.dir/Prak.dir/TUM-Prak-26-SS.dir/XuRenyi.dir/Dormitory%20Maintenance%20Worklist%20System.xml</url>
+                      <init>
+                        <location>!data.item["location"]</location>
+                        <room>!data.item["room"]</room>
+                        <category>!data.item["category"]</category>
+                        <description>!data.item["description"]</description>
+                        <urgency>!data.item["urgency"]</urgency>
+                      </init>
+                      <endpoints/>
+                      <attributes/>
+                      <customization/>
+                    </arguments>
+                  </parameters>
+                  <annotations>
+                    <_generic/>
+                    <_logging_behavior>
+                      <_exclude>false</_exclude>
+                      <_include>false</_include>
+                    </_logging_behavior>
+                    <_timing>
+                      <_timing_weight/>
+                      <_timing_avg/>
+                      <explanations/>
+                    </_timing>
+                    <_shifting>
+                      <_shifting_type>Duration</_shifting_type>
+                    </_shifting>
+                    <_context_data_analysis>
+                      <probes/>
+                      <ips/>
+                    </_context_data_analysis>
+                    <report>
+                      <url/>
+                    </report>
+                    <_notes>
+                      <_notes_general/>
+                    </_notes>
+                  </annotations>
+                  <documentation>
+                    <input/>
+                    <output/>
+                    <implementation>
+                      <description/>
+                    </implementation>
+                  </documentation>
+                </call>
+                <_probability>
+                  <_probability_min/>
+                  <_probability_max/>
+                  <_probability_avg/>
+                </_probability>
+              </alternative>
+              <otherwise eid="e8">
+                <call id="a6" endpoint="timeout">
+                  <parameters>
+                    <label>Wait before next check</label>
+                    <color/>
+                    <arguments>
+                      <timeout>0.5</timeout>
+                      <data/>
+                    </arguments>
+                  </parameters>
+                  <annotations>
+                    <_generic/>
+                    <_logging_behavior>
+                      <_exclude>false</_exclude>
+                      <_include>false</_include>
+                    </_logging_behavior>
+                    <_timing>
+                      <_timing_weight/>
+                      <_timing_avg/>
+                      <explanations/>
+                    </_timing>
+                    <_shifting>
+                      <_shifting_type>Duration</_shifting_type>
+                    </_shifting>
+                    <_context_data_analysis>
+                      <probes/>
+                      <ips/>
+                    </_context_data_analysis>
+                    <report>
+                      <url/>
+                    </report>
+                    <_notes>
+                      <_notes_general/>
+                    </_notes>
+                  </annotations>
+                  <documentation>
+                    <input/>
+                    <output/>
+                    <implementation>
+                      <description/>
+                    </implementation>
+                  </documentation>
+                </call>
+              </otherwise>
+            </choose>
+          </loop>
+        </parallel_branch>
+      </parallel>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+</testset>

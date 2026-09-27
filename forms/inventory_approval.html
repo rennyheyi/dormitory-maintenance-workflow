@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/worklist.css">
+
+<worklist-form-load>
+  $('.location').text(data.location || '—');
+  $('.room').text(data.room || '—');
+  $('.materials-list').text(data.materials_list || '—');
+</worklist-form-load>
+
+<section class="task-form">
+  <h2>Issue Materials</h2>
+
+  <div class="details">
+    <p><strong>Location:</strong> <span class="location"></span></p>
+    <p><strong>Room:</strong> <span class="room"></span></p>
+    <p><strong>Materials:</strong> <span class="materials-list"></span></p>
+  </div>
+
+  <input form="worklist-form" name="materials_issued" type="hidden" value="true">
+  <button form="worklist-form" type="submit">Confirm materials issued</button>
+</section>

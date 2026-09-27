@@ -1,0 +1,63 @@
+<table>
+  <tr>
+    <td><label for="location">Dormitory</label></td>
+    <td>
+      <select form="worklist-form" name="location" id="location" required>
+        <option value="">Select a dormitory</option>
+        <option value="Garching">Garching</option>
+        <option value="Olympiazentrum">Olympiazentrum</option>
+        <option value="Studentenstadt">Studentenstadt</option>
+        <option value="Giesing">Giesing</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr>
+    <td><label for="room">Room number</label></td>
+    <td>
+      <input form="worklist-form" type="text" name="room" id="room" required>
+    </td>
+  </tr>
+
+  <tr>
+    <td><label for="category">Category</label></td>
+    <td>
+      <select form="worklist-form" name="category" id="category" required>
+        <option value="">Select a category</option>
+        <option value="Plumbing">Plumbing</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Locks and Keys">Locks and Keys</option>
+        <option value="Appliances">Appliances</option>
+        <option value="Heating and Ventilation">Heating and Ventilation</option>
+        <option value="Other">Other</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr>
+    <td><label for="description">Description</label></td>
+    <td>
+      <textarea form="worklist-form" name="description" id="description" required></textarea>
+    </td>
+  </tr>
+
+  <tr>
+    <td><label for="urgency">Urgency</label></td>
+    <td>
+      <select form="worklist-form" name="urgency" id="urgency" required>
+        <option value="">Select urgency</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td>
+      <input form="worklist-form" type="submit" value="Submit request">
+    </td>
+  </tr>
+</table>

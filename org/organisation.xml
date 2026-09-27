@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<organisation xmlns="http://cpee.org/ns/organisation/1.0">
+  <units>
+    <unit id="Garching"><permissions/></unit>
+    <unit id="Olympiazentrum"><permissions/></unit>
+    <unit id="Studentenstadt"><permissions/></unit>
+    <unit id="Giesing"><permissions/></unit>
+  </units>
+  <roles>
+    <role id="Student"><permissions/></role>
+    <role id="Admin"><permissions/></role>
+    <role id="Technician"><permissions/></role>
+    <role id="InventoryManager"><permissions/></role>
+  </roles>
+  <subjects>
+    <subject id="Test Student" uid="student1">
+      <relation unit="Garching" role="Student"/>
+    </subject>
+    <subject id="Test Admin" uid="admin1">
+      <relation unit="Garching" role="Admin"/>
+      <relation unit="Olympiazentrum" role="Admin"/>
+      <relation unit="Studentenstadt" role="Admin"/>
+      <relation unit="Giesing" role="Admin"/>
+    </subject>
+    <subject id="Test Technician Garching" uid="tech1">
+      <relation unit="Garching" role="Technician"/>
+    </subject>
+    <subject id="Test Technician Olympia" uid="tech2">
+      <relation unit="Olympiazentrum" role="Technician"/>
+    </subject>
+    <subject id="Test Technician Studentenstadt" uid="tech3">
+      <relation unit="Studentenstadt" role="Technician"/>
+    </subject>
+    <subject id="Test Technician Giesing" uid="tech4">
+      <relation unit="Giesing" role="Technician"/>
+    </subject>
+    <subject id="Test Inventory Manager" uid="inv1">
+      <relation unit="Garching" role="InventoryManager"/>
+      <relation unit="Olympiazentrum" role="InventoryManager"/>
+      <relation unit="Studentenstadt" role="InventoryManager"/>
+      <relation unit="Giesing" role="InventoryManager"/>
+    </subject>
+  </subjects>
+</organisation>
