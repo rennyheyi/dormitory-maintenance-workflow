@@ -1,120 +1,211 @@
-# Dormitory Maintenance Worklist System – Requirements
+# Dormitory Maintenance Worklist System
 
-## 1. Purpose
+## Requirements Specification after Supervisor Meeting
 
-The system coordinates dormitory maintenance requests between students, administrators, technicians, and inventory managers using CPEE and the CPEE Worklist.
+### 1. Project objective
 
-## 2. Actors
+The project implements a dormitory maintenance request system with CPEE and the CPEE Worklist. It coordinates maintenance requests between students, administrators, technicians, and inventory managers. The system must support several independent maintenance requests at the same time instead of blocking all students while one request is being processed.
 
-- Student
-- Administrator
-- Technician
-- Inventory Manager
+### 2. Stakeholders and roles
 
-## 3. Functional Requirements
+| Role | Responsibility |
+|---|---|
+| Student | Submit a maintenance request and confirm the completed repair. |
+| Admin | Review, approve, or reject a request. |
+| Technician | Assess the problem, specify required materials, and complete the repair. |
+| InventoryManager | Confirm that requested materials have been issued. |
 
-### FR-01 Request submission
+The organisation model contains the dormitory units `Garching`, `Olympiazentrum`, `Studentenstadt`, and `Giesing`. Tasks should be routed by role and, where applicable, by the dormitory selected in the request.
 
-A student shall be able to submit a request containing:
+### 3. Functional requirements
 
-- dormitory location
-- room number
-- problem category
-- description
-- urgency
+#### FR-01: Submit maintenance request
 
-### FR-02 Administrative review
+The student shall be able to enter:
 
-An administrator shall be able to approve or reject a submitted request.
+- dormitory/location;
+- room number;
+- issue category;
+- problem description;
+- urgency.
 
-### FR-03 Rejected requests
+In the asynchronous version, the submission task must remain continuously available so that another student can submit a request while existing requests are being processed.
 
-A rejected request shall terminate without starting technical work.
+#### FR-02: Administrative review
 
-### FR-04 Technical assessment
+The administrator shall see the submitted request and choose one of the following decisions:
 
-For an approved request, a technician shall record assessment notes and indicate whether materials are required.
+- `approved`: continue with technical assessment;
+- `rejected`: terminate the request.
 
-### FR-05 Material issue
+The administrator may additionally record a note explaining the decision.
 
-If materials are required, an inventory manager shall confirm that they have been issued.
+#### FR-03: Technician assessment
 
-### FR-06 Repair
+After approval, a technician assigned to the corresponding dormitory shall inspect the problem and record:
 
-A technician shall perform the repair and record completion notes.
+- whether materials are needed;
+- the list of required materials;
+- assessment notes.
 
-### FR-07 Student confirmation
+#### FR-04: Material issue
 
-The student shall confirm whether the issue has been resolved and may provide a rating and feedback.
+If `materials_needed == true`, an InventoryManager shall receive a task and confirm that the materials have been issued. If no materials are required, this activity shall be skipped.
 
-### FR-08 Repeated repair
+#### FR-05: Repair completion
 
-If the student is not satisfied, the repair cycle shall be repeated.
+The technician shall perform the repair and enter repair notes.
 
-### FR-09 Organisational routing
+#### FR-06: Student confirmation
 
-Worklist tasks shall be assigned according to role and, where applicable, dormitory unit.
+The student shall confirm whether the issue has been resolved and provide:
 
-### FR-10 Synchronous processing
+- `satisfied` as a Boolean value;
+- a rating from 1 to 5;
+- optional feedback.
 
-The synchronous main model shall wait for one child process to finish before accepting the next request.
+If `satisfied == false`, the request shall return to the technician assessment and repair section. If `satisfied == true`, the request shall finish.
 
-### FR-11 Asynchronous processing
+### 4. Process architecture
 
-The asynchronous main model shall:
+The implementation consists of three process models.
 
-- keep request submission available;
-- add submitted requests to a FIFO queue;
-- remove one request at a time from the queue;
-- start child processes asynchronously;
-- support multiple requests running concurrently.
+#### 4.1 `Dormitory Maintenance Worklist System.xml`
 
-### FR-12 Data transfer
+`Dormitory Maintenance Worklist System.xml` represents the complete lifecycle of one maintenance request. It receives the request data from a parent process and contains the administrative review, technical assessment, optional inventory approval, repair, and student confirmation activities.
 
-Request data shall be transferred correctly from a main process to each child process. Concurrent requests shall use independent child-process data.
+Each invocation must have its own process data so that requests do not overwrite each other. The input fields must be preserved when the subprocess starts. Only internal result fields, such as decisions, notes, and Boolean status values, may be initialized for the new request.
 
-## 4. User Interface Requirements
+#### 4.2 `Main-Sync.xml`
 
-- Worklist forms shall use named HTML controls.
-- Controls shall belong to `worklist-form`.
-- Required fields shall use HTML validation.
-- Forms shall not implement a separate callback or manual HTTP submission.
-- Optional fields shall initially be empty.
+The synchronous model provides the simpler baseline implementation:
 
-## 5. Process Data Requirements
+1. A student submits a request.
+2. The model calls `Dormitory Maintenance Worklist System.xml` synchronously.
+3. The main process waits until the subprocess finishes.
+4. The submission task becomes available again.
 
-The system shall maintain the following data where applicable:
+This version is easier to understand but does not provide continuous request intake while the subprocess is running.
 
-- location
-- room
-- category
-- description
-- urgency
-- admin_decision
-- admin_note
-- materials_needed
-- materials_list
-- materials_issued
-- assessment_notes
-- repair_notes
-- satisfied
-- rating
-- feedback
+#### 4.3 `Main-Async.xml`
 
-The asynchronous main process shall additionally maintain:
+The asynchronous model is the target implementation for concurrent request handling. It contains two parallel branches:
 
-- `queue`
-- `item`
+1. A continuously available Student Worklist task receives requests and adds them to a queue.
+2. A worker loop reads the queue and starts one asynchronous `Dormitory Maintenance Worklist System.xml` subprocess for each request.
 
-## 6. Acceptance Criteria
+The asynchronous main process is a long-running process and is not expected to terminate automatically.
 
-The project is accepted when:
+### 5. Queue requirements for `Main-Async.xml`
 
-1. Worklist forms submit successfully.
-2. Data is transferred between all relevant tasks.
-3. Approved and rejected paths work correctly.
-4. The materials branch works correctly.
-5. An unsatisfied student causes another repair cycle.
-6. Main-Sync processes requests sequentially.
-7. Main-Async accepts and processes concurrent requests.
-8. All exported process models are valid XML.
+- The queue shall be initialized once when the main process starts:
+
+  ```ruby
+  data.queue = []
+  data.item = nil
+  ```
+
+- The Student Worklist activity shall use continuous/`Always` handling.
+- A submitted request shall be converted into one independent queue item.
+- The request shall be added in the activity's `Update` handling because the continuous Worklist activity does not normally reach `Finalize` after every submission.
+- Queue items shall contain `location`, `room`, `category`, `description`, and `urgency`.
+- The worker shall process requests in FIFO order by removing the first item:
+
+  ```ruby
+  data.item = data.queue.shift
+  ```
+
+- If `data.queue.length > 0`, the worker shall start a new asynchronous `Dormitory Maintenance Worklist System.xml` instance and pass all five request fields to it.
+- If the queue is empty, the worker shall wait approximately five seconds before checking again. This prevents a continuously running empty loop from consuming unnecessary resources.
+- Starting one subprocess must not block the worker from starting additional subprocesses for other queued requests.
+
+### 6. Process data
+
+| Field | Type/initial value | Produced or updated by |
+|---|---|---|
+| `location` | String | Student |
+| `room` | String | Student |
+| `category` | String | Student |
+| `description` | String | Student |
+| `urgency` | String | Student |
+| `admin_decision` | Empty String | Admin |
+| `admin_note` | Empty String | Admin |
+| `materials_needed` | `false` | Technician |
+| `materials_list` | Empty String | Technician |
+| `materials_issued` | `false` | InventoryManager |
+| `assessment_notes` | Empty String | Technician |
+| `repair_notes` | Empty String | Technician |
+| `satisfied` | `false` | Student |
+| `rating` | Integer/empty before confirmation | Student |
+| `feedback` | Empty String | Student |
+
+Dynamic values in CPEE task configuration must be evaluated as expressions and must not be passed as literal strings such as `data.location`.
+
+### 7. Worklist and form requirements
+
+- Each human activity shall use a dedicated HTML form.
+- Every submitted field shall have a `name` that exactly matches its CPEE Data Element.
+- Form controls and submit buttons shall be connected to the Worklist form using `form="worklist-form"`.
+- The forms shall use the Worklist submission mechanism and shall not implement a separate manual callback with `fetch()`.
+- Displayed values shall be loaded from the data supplied by CPEE.
+- Boolean strings returned by HTML forms shall be converted to actual Boolean values in CPEE.
+- Every task shall contain all Data Elements that it displays or updates.
+
+### 8. Data routing requirements
+
+- Request data must be passed from the Main process to `Dormitory Maintenance Worklist System.xml`.
+- Data must remain isolated between concurrently running subprocess instances.
+- Admin tasks shall be routed to an Admin responsible for the selected location.
+- Technician tasks shall be routed to a Technician responsible for the selected location.
+- Inventory tasks shall use the `InventoryManager` role consistently with the organisation model.
+- Final confirmations shall be routed to the appropriate Student.
+
+### 9. Acceptance criteria
+
+The implementation is considered complete when all of the following tests succeed:
+
+1. A student can submit a request and all five input values arrive correctly in the subprocess.
+2. An administrator can approve or reject the request, and both branches behave correctly.
+3. The material approval task appears only when materials are required.
+4. A dissatisfied student causes the technical section to repeat; a satisfied student finishes the request.
+5. Tasks are assigned to the correct role and dormitory unit.
+6. In `Main-Async.xml`, the Student submission task remains available while earlier requests are still running.
+7. Two or more submissions create separate `Dormitory Maintenance Worklist System.xml` instances whose data does not overwrite each other.
+8. An empty asynchronous queue waits before checking again and does not create unnecessary subprocesses.
+9. `Main-Sync.xml` and `Main-Async.xml` both execute successfully.
+10. The README explains the architectural difference and trade-off between the synchronous and asynchronous versions.
+
+### 10. Implementation evidence
+
+#### 10.1 Synchronous request handling
+
+![Synchronous main process](docs/images/main-sync.png)
+
+*Figure 1: `Main-Sync.xml` submits one request and invokes the maintenance subprocess in `wait_running` mode. The parent process waits until the subprocess finishes.*
+
+#### 10.2 Asynchronous request handling
+
+![Asynchronous main process](docs/images/main-async.png)
+
+*Figure 2: `Main-Async.xml` keeps the student submission activity available, removes requests from the queue, and starts maintenance subprocesses in `fork_running` mode.*
+
+#### 10.3 Maintenance subprocess
+
+![Maintenance subprocess](docs/images/maintenance-subprocess.png)
+
+*Figure 3: One maintenance subprocess contains administrative review, technician assessment, optional material issue, repair, and student confirmation. The process data at the top demonstrates that request values reached the subprocess.*
+
+#### 10.4 Worklist data transfer
+
+![Technician assessment form](docs/images/data-transfer.png)
+
+*Figure 4: The technician Worklist form displays the location, room, category, description, and urgency transferred through the process data.*
+
+### 11. Required deliverables
+
+- `Dormitory Maintenance Worklist System.xml`: subprocess for one maintenance request;
+- `Main-Sync.xml`: synchronous reference implementation;
+- `Main-Async.xml`: queue-based asynchronous implementation;
+- organisation model containing all roles and dormitory units;
+- HTML Worklist forms for all human tasks;
+- README describing configuration, execution, test users, the two architectures, and known limitations.
