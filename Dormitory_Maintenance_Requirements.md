@@ -179,25 +179,25 @@ The implementation is considered complete when all of the following tests succee
 
 #### 10.1 Synchronous request handling
 
-![Synchronous main process](docs/images/main-sync.png)
+![Synchronous main process](main-sync.png)
 
 *Figure 1: `Main-Sync.xml` submits one request and invokes the maintenance subprocess in `wait_running` mode. The parent process waits until the subprocess finishes.*
 
 #### 10.2 Asynchronous request handling
 
-![Asynchronous main process](docs/images/main-async.png)
+![Asynchronous main process](main-async.png)
 
 *Figure 2: `Main-Async.xml` keeps the student submission activity available, removes requests from the queue, and starts maintenance subprocesses in `fork_running` mode.*
 
 #### 10.3 Maintenance subprocess
 
-![Maintenance subprocess](docs/images/maintenance-subprocess.png)
+![Maintenance subprocess](maintenance-subprocess.png)
 
 *Figure 3: One maintenance subprocess contains administrative review, technician assessment, optional material issue, repair, and student confirmation. The process data at the top demonstrates that request values reached the subprocess.*
 
 #### 10.4 Worklist data transfer
 
-![Technician assessment form](docs/images/data-transfer.png)
+![Technician assessment form](data-transfer.png)
 
 *Figure 4: The technician Worklist form displays the location, room, category, description, and urgency transferred through the process data.*
 
