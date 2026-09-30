@@ -6,35 +6,47 @@
     <unit id="Studentenstadt"><permissions/></unit>
     <unit id="Giesing"><permissions/></unit>
   </units>
+
   <roles>
     <role id="Student"><permissions/></role>
     <role id="Admin"><permissions/></role>
     <role id="Technician"><permissions/></role>
     <role id="InventoryManager"><permissions/></role>
   </roles>
+
   <subjects>
-    <subject id="Test Student" uid="student1">
+    <subject id="Renny" uid="go34sat-renny">
       <relation unit="Garching" role="Student"/>
     </subject>
-    <subject id="Test Admin" uid="admin1">
+
+    <subject id="Lina" uid="go34sat-lina">
+      <relation unit="Garching" role="Student"/>
+    </subject>
+
+    <subject id="Admin Jenny" uid="go34sat-admin-jenny">
       <relation unit="Garching" role="Admin"/>
       <relation unit="Olympiazentrum" role="Admin"/>
       <relation unit="Studentenstadt" role="Admin"/>
       <relation unit="Giesing" role="Admin"/>
     </subject>
-    <subject id="Test Technician Garching" uid="tech1">
+
+    <subject id="Technician Daniel" uid="go34sat-tech-garching">
       <relation unit="Garching" role="Technician"/>
     </subject>
-    <subject id="Test Technician Olympia" uid="tech2">
+
+    <subject id="Technician Sophie" uid="go34sat-tech-olympia">
       <relation unit="Olympiazentrum" role="Technician"/>
     </subject>
-    <subject id="Test Technician Studentenstadt" uid="tech3">
+
+    <subject id="Technician Leon" uid="go34sat-tech-stusta">
       <relation unit="Studentenstadt" role="Technician"/>
     </subject>
-    <subject id="Test Technician Giesing" uid="tech4">
+
+    <subject id="Technician Mia" uid="go34sat-tech-giesing">
       <relation unit="Giesing" role="Technician"/>
     </subject>
-    <subject id="Test Inventory Manager" uid="inv1">
+
+    <subject id="Inventory Markus" uid="go34sat-inv-markus">
       <relation unit="Garching" role="InventoryManager"/>
       <relation unit="Olympiazentrum" role="InventoryManager"/>
       <relation unit="Studentenstadt" role="InventoryManager"/>

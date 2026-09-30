@@ -2,11 +2,11 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
   <executionhandler>ruby</executionhandler>
   <dataelements>
-    <location>&#x201C;&#x201D;</location>
-    <room>&#x201C;&#x201D;</room>
-    <urgency>&#x201C;&#x201D;</urgency>
-    <category>&#x201C;&#x201D;</category>
-    <description>&#x201C;&#x201D;</description>
+    <location/>
+    <room/>
+    <urgency/>
+    <category/>
+    <description/>
   </dataelements>
   <documents/>
   <endpoints>
@@ -118,7 +118,7 @@ data.urgency = form["urgency"]</finalize>
             <label>Handle maintenance request</label>
             <color/>
             <arguments>
-              <behavior>wait_running</behavior>
+              <behavior>fork_running</behavior>
               <url>https://cpee.org/hub/server/Teaching.dir/Prak.dir/TUM-Prak-26-SS.dir/XuRenyi.dir/Dormitory%20Maintenance%20Worklist%20System.xml</url>
               <init>
                 <location>!data.location</location>

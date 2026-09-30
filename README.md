@@ -33,12 +33,12 @@ This is the child process that handles one maintenance request from administrati
 
 ### Main-Sync
 
-The synchronous main process:
+The synchronized-intake main process:
 
-- receives one student request;
-- starts the child process with `wait_running`;
-- waits until that request has been completed;
-- then accepts the next request.
+- exposes a Student task with `By Single Worker` handling;
+- allows one student to claim the current request form;
+- starts the child process with `fork_running`;
+- immediately creates the next request task while the child process continues independently.
 
 ### Main-Async
 
@@ -53,10 +53,12 @@ The asynchronous main process:
 
 ## Sync and Async Comparison
 
-| Model | Request handling | Subprocess mode | Parallel requests |
+| Model | Request handling | Subprocess mode | Concurrent form access |
 |---|---|---|---|
-| Main-Sync | One request at a time | `wait_running` | No |
-| Main-Async | FIFO request queue | `fork_running` | Yes |
+| Main-Sync | Single-worker intake task | `fork_running` | No |
+| Main-Async | Always-available task with FIFO queue | `fork_running` | Yes |
+
+Both models allow multiple maintenance subprocesses to run at the same time. The difference is at the request-entry task: Main-Sync synchronizes access to each current form, while Main-Async accepts concurrent submissions through its queue.
 
 ## Request Data
 
@@ -76,10 +78,14 @@ Additional process data includes the administrator decision, assessment notes, r
 - `forms/`: Worklist HTML forms and shared CSS
 - `org/`: CPEE organisation model
 - `Dormitory_Maintenance_Requirements.md`: project requirements
+- `DOCUMENTATION.md`: complete technical documentation and verified test evidence
+- `docs/images/`: process and Worklist screenshots used by the documentation
 
 ## Testing
 
-The complete child process was tested through the Worklist. The synchronous model was tested sequentially, and the asynchronous model was tested with multiple requests running concurrently.
+The complete child process was tested through the Worklist. Main-Sync was tested with two Student users to verify single-worker task locking, and Main-Async was tested to verify concurrent form availability and independent request processing.
+
+See the [complete technical documentation](DOCUMENTATION.md) for architecture, configuration details, Sync/Async behaviour, data mappings, screenshots, and test results.
 
 ## Technologies
 

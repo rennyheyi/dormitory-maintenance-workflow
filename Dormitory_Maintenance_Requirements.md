@@ -78,14 +78,15 @@ Each invocation must have its own process data so that requests do not overwrite
 
 #### 4.2 `Main-Sync.xml`
 
-The synchronous model provides the simpler baseline implementation:
+The Sync model provides the simpler synchronized-intake implementation:
 
-1. A student submits a request.
-2. The model calls `Dormitory Maintenance Worklist System.xml` synchronously.
-3. The main process waits until the subprocess finishes.
-4. The submission task becomes available again.
+1. The Student Worklist task uses `By Single Worker` handling.
+2. One student claims and submits the current request form.
+3. The model starts `Dormitory Maintenance Worklist System.xml` with `fork_running`.
+4. The main process does not wait for the maintenance subprocess to finish.
+5. The loop immediately creates a new Student request task.
 
-This version is easier to understand but does not provide continuous request intake while the subprocess is running.
+This version supports continuous intake while previous maintenance subprocesses are running, but only one student can claim each current request task. In this project, “Sync” refers to synchronized form access rather than a blocking subprocess call.
 
 #### 4.3 `Main-Async.xml`
 
@@ -181,7 +182,7 @@ The implementation is considered complete when all of the following tests succee
 
 ![Synchronous main process](main-sync.png)
 
-*Figure 1: `Main-Sync.xml` submits one request and invokes the maintenance subprocess in `wait_running` mode. The parent process waits until the subprocess finishes.*
+*Figure 1: `Main-Sync.xml` synchronizes access to the current Student task, invokes the maintenance subprocess in `fork_running` mode, and immediately loops back to create a new intake task.*
 
 #### 10.2 Asynchronous request handling
 
@@ -204,7 +205,7 @@ The implementation is considered complete when all of the following tests succee
 ### 11. Required deliverables
 
 - `Dormitory Maintenance Worklist System.xml`: subprocess for one maintenance request;
-- `Main-Sync.xml`: synchronous reference implementation;
+- `Main-Sync.xml`: synchronized single-worker intake implementation;
 - `Main-Async.xml`: queue-based asynchronous implementation;
 - organisation model containing all roles and dormitory units;
 - HTML Worklist forms for all human tasks;

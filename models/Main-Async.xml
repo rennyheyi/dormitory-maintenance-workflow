@@ -3,7 +3,7 @@
   <executionhandler>ruby</executionhandler>
   <dataelements>
     <queue>[]</queue>
-    <item>{"location":"Garching","room":"1","category":"Plumbing","description":"1","urgency":"Low"}</item>
+    <item>{}</item>
   </dataelements>
   <documents/>
   <endpoints>
