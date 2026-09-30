@@ -1,14 +1,5 @@
 # Dormitory Maintenance Worklist System
 
-## Technical Documentation and Evaluation
-
-**Author:** Renny Xu  
-**Platform:** CPEE Process Engine and CPEE Worklist  
-**Version:** 1.0  
-**Date:** 30 September 2026  
-**Repository:** <https://github.com/rennyheyi/dormitory-maintenance-workflow>
-
----
 
 ## 1. Executive Summary
 
@@ -25,78 +16,8 @@ The two main processes use the same maintenance subprocess and both start it wit
 - Main-Sync uses `By Single Worker`. One student claims the current form, and other students must wait until a new form is created.
 - Main-Async uses `Always Available`. Multiple students can open and submit the form independently, and every submission is appended to `data.queue`.
 
-Live tests confirmed that both designs create independent maintenance subprocesses and transfer all request fields correctly.
 
----
-
-## 2. Problem Statement
-
-A conventional single workflow instance can process only one request at a time. If the student submission task is placed directly at the beginning of a long maintenance workflow, the instance remains occupied until the request is approved, repaired, and confirmed. During that time, other students may be unable to submit new requests through the same instance.
-
-The redesigned system separates two responsibilities:
-
-- **Request intake:** kept continuously available in a main process.
-- **Request processing:** executed once per request in an independent subprocess.
-
-This separation allows the system to accept new requests while previous maintenance cases are still running.
-
----
-
-## 3. Project Objectives
-
-The system shall:
-
-- provide a simple Worklist form for maintenance requests;
-- support students from multiple dormitory locations;
-- route requests to the correct organisational roles;
-- support administrative approval or rejection;
-- allow technicians to assess and repair a reported problem;
-- route material requests through inventory management only when needed;
-- allow the student to confirm the result and rate the repair;
-- repeat the repair cycle when the student is not satisfied;
-- keep the student request entry point available while other requests are processed;
-- demonstrate and compare synchronized and asynchronous request intake;
-- preserve each request's data in its own subprocess instance.
-
----
-
-## 4. Functional Requirements
-
-| ID | Requirement |
-|---|---|
-| FR-01 | A student shall be able to submit a maintenance request containing dormitory, room, category, description, and urgency. |
-| FR-02 | The system shall transfer all submitted fields into a new maintenance subprocess. |
-| FR-03 | An administrator shall be able to approve or reject a request. |
-| FR-04 | A rejected request shall terminate without technician work. |
-| FR-05 | An approved request shall be assigned to a technician. |
-| FR-06 | A technician shall record assessment notes and whether materials are required. |
-| FR-07 | If materials are required, an inventory manager shall confirm that they were issued. |
-| FR-08 | If materials are not required, the inventory task shall be skipped. |
-| FR-09 | A technician shall record repair completion notes. |
-| FR-10 | A student shall confirm whether the issue was resolved and provide a rating and optional feedback. |
-| FR-11 | If the student is not satisfied, the technician repair cycle shall be repeated. |
-| FR-12 | The main process shall remain available for new requests while maintenance subprocesses are running. |
-| FR-13 | The Sync variant shall allow only one student to claim the current request form. |
-| FR-14 | The Async variant shall allow several students to access and submit the request form concurrently. |
-| FR-15 | Every accepted request shall produce an independent subprocess with independent data objects. |
-
----
-
-## 5. Non-Functional Requirements
-
-| ID | Requirement |
-|---|---|
-| NFR-01 | Worklist forms shall be short, readable HTML fragments without unnecessary callback or network code. |
-| NFR-02 | Field names shall be consistent across forms, CPEE Data Elements, and Ruby mappings. |
-| NFR-03 | The process models shall visibly represent decisions, loops, and subprocess creation. |
-| NFR-04 | The organisational model shall separate Student, Admin, Technician, and InventoryManager responsibilities. |
-| NFR-05 | The implementation shall be understandable and demonstrable in the CPEE graphical editor. |
-| NFR-06 | Submitted requests shall not overwrite data belonging to another request. |
-| NFR-07 | The source code and process models shall be version-controlled in GitHub. |
-
----
-
-## 6. Actors and Responsibilities
+## 2. Actors and Responsibilities
 
 | Actor | Responsibilities |
 |---|---|
@@ -105,7 +26,7 @@ The system shall:
 | Technician | Inspect the problem; identify required materials; perform the repair; document the result. |
 | Inventory Manager | Issue materials requested by a technician. |
 
-### 6.1 Dormitory Units
+### 2.1 Dormitory Units
 
 The organisation model contains four units:
 
@@ -114,7 +35,7 @@ The organisation model contains four units:
 - Studentenstadt
 - Giesing
 
-### 6.2 Demonstration Users
+### 2.2 Demonstration Users
 
 | Display name | Worklist UID | Role / Unit |
 |---|---|---|
@@ -131,7 +52,7 @@ The public CPEE demonstration Worklist does not require a password. The UID sele
 
 ---
 
-## 7. System Architecture
+## 3 System Architecture
 
 The system follows a main-process/subprocess architecture.
 
@@ -149,19 +70,19 @@ flowchart TD
 
 The main processes are intentionally small. They accept requests, prepare request data, and start the subprocess. All business logic is placed in the reusable maintenance subprocess.
 
-### 7.1 Main-Sync Model
+### 3.1 Main-Sync Model
 
 ![Main-Sync process model](docs/images/01-main-sync-graph.svg)
 
 **Figure 1. Main-Sync process model.** The process waits for a single student submission, starts a maintenance subprocess, and loops back to create the next request task.
 
-### 7.2 Main-Async Model
+### 3.2 Main-Async Model
 
 ![Main-Async process model](docs/images/02-main-async-graph.svg)
 
 **Figure 2. Main-Async process model.** One branch keeps the student form continuously available. The second branch polls a queue and starts a subprocess for every queued request.
 
-### 7.3 Maintenance Subprocess
+### 3.3 Maintenance Subprocess
 
 ![Maintenance subprocess](docs/images/03-maintenance-subprocess-graph.svg)
 
@@ -169,9 +90,9 @@ The main processes are intentionally small. They accept requests, prepare reques
 
 ---
 
-## 8. Main-Sync Design
+## 4. Main-Sync Design
 
-### 8.1 Intended Behaviour
+### 4.1 Intended Behaviour
 
 Main-Sync synchronizes access to the request form. The Worklist task uses the handling mode `By Single Worker`:
 
@@ -184,13 +105,13 @@ Main-Sync synchronizes access to the request form. The Worklist task uses the ha
 
 The maintenance work does not block the next request. Only access to the current input task is synchronized.
 
-### 8.2 Student Task Configuration
+### 4.2 Student Task Configuration
 
 ![Sync student task configuration](docs/images/07-sync-student-task-config.jpg)
 
 **Figure 4. Sync student task configuration.** The role is Student and handling is `By Single Worker`. The five request fields are connected to the main process data objects.
 
-### 8.3 Finalize Logic
+### 4.3 Finalize Logic
 
 The Sync task ends after a form submission. Its `Finalize` section converts the returned Worklist field array into a hash and writes the values to process data objects:
 
@@ -207,7 +128,7 @@ data.urgency = form["urgency"]
 
 **Figure 5. Sync `Finalize` mapping.** Form results are copied into the main process before the subprocess is created.
 
-### 8.4 Subprocess Call
+### 4.4 Subprocess Call
 
 The subprocess call receives the five request values as initialization data. Its mode is `fork_running`.
 
@@ -215,15 +136,15 @@ The subprocess call receives the five request values as initialization data. Its
 
 **Figure 6. Sync subprocess configuration.** `fork_running` starts the maintenance instance and allows Main-Sync to continue without waiting for it to finish.
 
-### 8.5 Why This Variant Is Called Sync
+### 4.5 Why This Variant Is Called Sync
 
 The name refers to **synchronized access to the student request task**, not to synchronous subprocess execution. The subprocess is still forked. Students are synchronized only while claiming the current input task.
 
 ---
 
-## 9. Main-Async Design
+## 5. Main-Async Design
 
-### 9.1 Intended Behaviour
+### 5.1 Intended Behaviour
 
 Main-Async keeps the request form continuously available and separates data collection from data processing:
 
@@ -236,7 +157,7 @@ Main-Async keeps the request form continuously available and separates data coll
 7. The worker returns to the queue check.
 8. The student form remains available throughout this operation.
 
-### 9.2 Student Task Configuration
+### 5.2 Student Task Configuration
 
 ![Async student task configuration](docs/images/10-async-student-task-config.jpg)
 
@@ -244,7 +165,7 @@ Main-Async keeps the request form continuously available and separates data coll
 
 The task input fields are initialized independently rather than from shared main-process request fields. This prevents one student's partially filled form from inheriting another request's values.
 
-### 9.3 Why Async Uses Update Instead of Finalize
+### 5.3 Why Async Uses Update Instead of Finalize
 
 This is a central implementation difference:
 
@@ -270,7 +191,7 @@ data.queue.push({
 
 **Figure 8. Async Update logic.** Every submission is appended as a separate queue item.
 
-### 9.4 Queue Processing
+### 5.4 Queue Processing
 
 The worker branch uses the condition:
 
@@ -290,7 +211,7 @@ data.item = data.queue.shift
 
 When the queue is empty, a short wait step prevents the process from executing an uncontrolled tight loop.
 
-### 9.5 Subprocess Call
+### 5.5 Subprocess Call
 
 The subprocess is initialized from the current queue item:
 
@@ -306,7 +227,7 @@ data.item["urgency"]
 
 **Figure 10. Async subprocess configuration.** Each dequeued item becomes the initialization data for a new `fork_running` maintenance instance.
 
-### 9.6 Queue Properties
+### 5.6 Queue Properties
 
 The queue is:
 
@@ -317,7 +238,7 @@ The queue is:
 
 ---
 
-## 10. Sync and Async Comparison
+## 6. Sync and Async Comparison
 
 | Aspect | Main-Sync | Main-Async |
 |---|---|---|
@@ -333,7 +254,7 @@ The queue is:
 | Complexity | Lower | Higher |
 | Best use | Simple controlled intake | High-volume concurrent intake |
 
-### 10.1 Behavioural Interpretation
+### 6.1 Behavioural Interpretation
 
 Suppose Student A submits a request and the maintenance case has already reached InventoryManager:
 
@@ -342,7 +263,7 @@ Suppose Student A submits a request and the maintenance case has already reached
 
 ---
 
-## 11. Maintenance Subprocess
+## 7. Maintenance Subprocess
 
 The subprocess contains the full business workflow for one request.
 
@@ -361,7 +282,7 @@ flowchart TD
     S -->|Yes| E[End]
 ```
 
-### 11.1 Administrative Review
+### 6.1 Administrative Review
 
 The administrator sees the submitted request data and selects one of two decisions:
 
@@ -370,7 +291,7 @@ The administrator sees the submitted request data and selects one of two decisio
 
 The earlier `returned` option was removed to keep the final workflow clear and avoid a second student-revision loop. A rejected request terminates; an approved request proceeds to technician assessment.
 
-### 11.2 Technician Assessment
+### 6.2 Technician Assessment
 
 The technician receives:
 
@@ -392,7 +313,7 @@ The HTML radio value is converted to a Boolean:
 data.materials_needed = form["materials_needed"] == "true"
 ```
 
-### 11.3 Inventory Approval
+### 6.3 Inventory Approval
 
 The InventoryManager task is executed only when:
 
@@ -402,11 +323,11 @@ data.materials_needed == true
 
 The manager sees the request location, room, and materials list and confirms that the materials were issued.
 
-### 11.4 Repair Completion
+### 6.4 Repair Completion
 
 The technician sees assessment information and materials data, performs the repair, and records `repair_notes`.
 
-### 11.5 Student Confirmation
+### 6.5 Student Confirmation
 
 The student receives the repair notes and submits:
 
@@ -432,9 +353,9 @@ The loop repeats only if the student reports that the issue is not resolved.
 
 ---
 
-## 12. Process Data Model
+## 7. Process Data Model
 
-### 12.1 Maintenance Subprocess Data Objects
+### 7.1 Maintenance Subprocess Data Objects
 
 | Data object | Type / representation | Initial value | Purpose |
 |---|---|---|---|
@@ -454,20 +375,20 @@ The loop repeats only if the student reports that the issue is not resolved.
 | `rating` | Integer | `0` | Student rating from 1 to 5 |
 | `feedback` | String | Empty | Optional student feedback |
 
-### 12.2 Main-Async Data Objects
+### 7.2 Main-Async Data Objects
 
 | Data object | Type | Purpose |
 |---|---|---|
 | `queue` | Array | Stores all submitted but not yet dispatched requests |
 | `item` | Hash / object | Stores the request currently removed from the queue |
 
-### 12.3 Data Boundary
+### 7.3 Data Boundary
 
 The main process passes request data into the subprocess at creation time. After that point, the child instance owns its own copy. Administrator, technician, inventory, and confirmation results remain inside that child instance. This prevents parallel requests from overwriting each other.
 
 ---
 
-## 13. Worklist Forms
+## 8. Worklist Forms
 
 The frontend consists of six HTML form fragments and one shared stylesheet:
 
@@ -481,7 +402,7 @@ The frontend consists of six HTML form fragments and one shared stylesheet:
 | `student_confirmation.html` | Student satisfaction, rating, and feedback |
 | `worklist.css` | Shared styling |
 
-### 13.1 Worklist Form Contract
+### 8.1 Worklist Form Contract
 
 Every submitted control follows this pattern:
 
@@ -509,7 +430,7 @@ The submit button follows the same convention:
 
 No custom `fetch`, callback URL, `URLSearchParams`, or `onclick` submission code is required. The Worklist container handles the callback to CPEE.
 
-### 13.2 Data Display
+### 8.2 Data Display
 
 Later workflow forms use `<worklist-form-load>` to display values supplied by the CPEE task:
 
@@ -525,7 +446,7 @@ $(".room", $(form_area)).text(values.room || "—");
 
 If a field displays `—`, the cause is normally not the HTML itself. It means that the corresponding CPEE task Data Element was not supplied or its name did not match.
 
-### 13.3 Naming Consistency
+### 8.3 Naming Consistency
 
 The following names must match exactly across all layers:
 
@@ -543,7 +464,7 @@ For example, `assessment_notes` must not be changed to `assessmentNotes`, `asses
 
 ---
 
-## 14. Organisation Model
+## 9. Organisation Model
 
 The organisation model is stored in:
 
@@ -567,17 +488,16 @@ Each Worklist task uses:
 
 Technicians are separated by dormitory unit so that maintenance work can be routed to the relevant location. The administrator and inventory manager cover all four units.
 
-### 14.1 Known Demonstration Limitation
+### 9.1 Known Demonstration Limitation
 
 Student confirmation is currently role-based. Therefore, both Renny and Lina may see a Student confirmation task even when only one of them submitted the original request. A production design should store the requester's UID and add a subject restriction to later student tasks.
 
 ---
 
-## 15. Repository Structure
+## 10. Repository Structure
 
 ```text
 dormitory-maintenance-workflow/
-├── .gitignore
 ├── README.md
 ├── DOCUMENTATION.md
 ├── Dormitory_Maintenance_Requirements.md
@@ -599,13 +519,11 @@ dormitory-maintenance-workflow/
     └── images/
 ```
 
-The old `service.py` was not used by the final design and was removed from the repository. Form submission is handled by the CPEE Worklist service.
 
----
 
-## 16. Deployment and Execution
+## 11. Deployment and Execution
 
-### 16.1 Hosted Resources
+### 11.1 Hosted Resources
 
 The HTML forms and organisation model are hosted under:
 
@@ -620,7 +538,7 @@ https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/student_request.html
 https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/admin_review.html
 ```
 
-### 16.2 Demonstration Instances
+### 11.2 Demonstration Instances
 
 | Model | Instance | URL |
 |---|---:|---|
@@ -630,7 +548,7 @@ https://lehre.bpm.in.tum.de/~go34sat/prak26/forms/admin_review.html
 
 These numbers identify the current demonstration instances. New test instances may receive different IDs.
 
-### 16.3 Worklist Access
+### 11.3 Worklist Access
 
 Examples:
 
@@ -642,7 +560,7 @@ https://cpee.org/worklist/?user=go34sat-admin-jenny
 
 After entering the UID, select **get Worklist**.
 
-### 16.4 Starting a New Test
+### 11.4 Starting a New Test
 
 1. Open the desired CPEE model or create a new instance from that model.
 2. Open the **Execution** tab.
@@ -656,19 +574,9 @@ Starting the same saved model again creates a new process instance. Each instanc
 
 ---
 
-## 17. Verification and Test Results
+## 12. Verification and Test Results
 
-### 17.1 Test Environment
-
-Testing was performed on 30 September 2026 using:
-
-- Main-Sync instance `111183`;
-- Main-Async instance `111095`;
-- the public CPEE Worklist;
-- student users Renny and Lina;
-- administrator user Admin Jenny.
-
-### 17.2 Initial Availability
+### 12.1 Initial Availability
 
 Before a Sync task was claimed, both students could see the Sync and Async request tasks.
 
@@ -678,7 +586,7 @@ Before a Sync task was claimed, both students could see the Sync and Async reque
 
 **Figures 11–12. Initial Worklist state.** Both request-entry variants are available to both Student users.
 
-### 17.3 Sync Locking Test
+### 12.2 Sync Locking Test
 
 Renny selected the Main-Sync task and opened the request form.
 
@@ -690,7 +598,7 @@ At the same time, Lina's Worklist showed only Main-Async.
 
 **Result:** Passed. `By Single Worker` correctly hides the claimed Sync task from another Student user.
 
-### 17.4 Async Concurrent-Access Test
+### 12.3 Async Concurrent-Access Test
 
 Lina opened the Main-Async request form.
 
@@ -702,14 +610,14 @@ While Lina had the form open, Renny's Worklist still displayed Main-Async.
 
 **Result:** Passed. `Always Available` allows concurrent access.
 
-### 17.5 Submitted Test Data
+### 12.4 Submitted Test Data
 
 | Source | Location | Room | Category | Description | Urgency |
 |---|---|---|---|---|---|
 | Main-Sync | Garching | `SYNC-101` | Plumbing | `SYNC TEST - leaking sink` | Medium |
 | Main-Async | Olympiazentrum | `ASYNC-201` | Electrical | `ASYNC TEST - desk lamp outlet` | Low |
 
-### 17.6 Continuous Intake Test
+### 12.5 Continuous Intake Test
 
 After the Sync request was submitted, a new Main-Sync request task immediately appeared.
 
@@ -721,7 +629,7 @@ After the Async request was submitted, the always-available task remained visibl
 
 **Result:** Passed. Neither maintenance request blocked future request intake.
 
-### 17.7 Subprocess Creation
+### 12.6 Subprocess Creation
 
 The two submissions created two independent child instances:
 
@@ -732,7 +640,7 @@ The two submissions created two independent child instances:
 
 Both appeared as separate `Admin review & dispatch` tasks in Admin Jenny's Worklist.
 
-### 17.8 Form-Level Data Transfer
+### 12.7 Form-Level Data Transfer
 
 ![Sync request in admin form](docs/images/26-admin-sync-data-transfer.jpg)
 
@@ -742,7 +650,7 @@ Both appeared as separate `Admin review & dispatch` tasks in Admin Jenny's Workl
 
 **Figure 20. Async request data in child instance 111210.** The second request contains its own independent values.
 
-### 17.9 Data-Object Verification
+### 12.8 Data-Object Verification
 
 ![Sync child data objects](docs/images/28-sync-child-instance-data.jpg)
 
@@ -750,7 +658,7 @@ Both appeared as separate `Admin review & dispatch` tasks in Admin Jenny's Workl
 
 **Figures 21–22. Independent child-process data.** The CPEE Data Objects confirm that the two requests did not overwrite one another.
 
-### 17.10 Test Summary
+### 12.9 Test Summary
 
 | Test case | Expected result | Actual result | Status |
 |---|---|---|---|
@@ -782,125 +690,7 @@ The final architecture resulted from several implementation and review iteration
 
 This redesign directly addresses the requirement that students must be able to submit new requests while other requests are still being processed.
 
----
-
-## 19. Troubleshooting Guide
-
-### 19.1 Submit Button Does Nothing
-
-Check that every form control and submit button contains:
-
-```html
-form="worklist-form"
-```
-
-Also verify that the form is opened through the Worklist task rather than by directly opening the HTML URL. A standalone HTML fragment has no CPEE callback context.
-
-### 19.2 Process Moves but Data Displays as a Dash
-
-Check all of the following:
-
-1. The source task contains the required Data Element.
-2. The target task also receives that Data Element.
-3. The HTML `name` matches the CPEE name.
-4. The Ruby mapping reads the same name.
-5. The subprocess initialization mapping passes the field.
-
-### 19.3 User Sees No Task
-
-Check:
-
-- the exact Worklist UID;
-- the role spelling in `organisation.xml`;
-- the task role spelling;
-- the unit mapping;
-- whether another user has already claimed a single-worker task;
-- whether the CPEE instance is in the `running` state;
-- whether **get Worklist** was selected after entering the UID.
-
-### 19.4 Abandoned Instance Still Appears in Worklist
-
-Worklist tasks can temporarily remain visible because the Worklist UI and the process engine update asynchronously. Refresh the task list with **get Worklist**. Do not complete stale tasks merely to remove them.
-
-### 19.5 Async Queue Does Not Start a Subprocess
-
-Verify:
-
-- `data.queue` is initialized as an empty array;
-- the Always Available task pushes a hash into the queue in `Update`;
-- the condition is `data.queue.length > 0`;
-- the script task uses `data.item = data.queue.shift`;
-- the subprocess initialization reads from `data.item`;
-- the worker loop contains a wait path when the queue is empty.
-
----
-
-## 20. Limitations
-
-The current implementation is suitable for a practical course demonstration but has several production limitations:
-
-1. **No real authentication:** the public demo Worklist identifies users by UID without passwords.
-2. **No requester-specific confirmation restriction:** any Student may see a confirmation task unless a subject restriction is added.
-3. **In-memory Async queue:** queued requests are not stored in an external persistent message broker.
-4. **No attachments:** students cannot upload photos of a defect.
-5. **No notifications:** the system does not send email or mobile status updates.
-6. **Limited audit presentation:** CPEE logs exist, but the project has no separate reporting dashboard.
-7. **Static role model:** technician coverage is defined manually in XML.
-8. **Test-instance URLs are temporary identifiers:** new instances receive new numbers.
-
----
-
-## 21. Security and Data Considerations
-
-- No passwords, tokens, API keys, or private keys are stored in the repository.
-- The forms contain only demonstration maintenance data.
-- In a production system, the public organisation model and password-free Worklist must be replaced with authenticated access.
-- Free-text descriptions and feedback should be validated and escaped when displayed.
-- Request ownership should be recorded so that only the submitting student can confirm the repair.
-- A production queue should provide persistence, retry handling, and dead-letter processing.
-
----
-
-## 22. Future Improvements
-
-Recommended extensions include:
-
-1. Store `requester_uid` and restrict student confirmation to that user.
-2. Add request IDs and timestamps for traceability.
-3. Add photo or document attachments.
-4. Add email notifications when the request status changes.
-5. Replace the in-memory queue with a persistent queue for production use.
-6. Add escalation rules for high-urgency requests.
-7. Add technician workload balancing.
-8. Add a dashboard showing open, rejected, repaired, and repeated cases.
-9. Add automated process tests through the CPEE API.
-10. Record processing time per stage for performance analysis.
-
----
-
-## 23. Requirements Traceability
-
-| Requirement | Main implementation element | Verification |
-|---|---|---|
-| FR-01 | `student_request.html` | Sync and Async submissions completed |
-| FR-02 | Finalize / Update and subprocess initialization | Admin forms and child Data Objects displayed all fields |
-| FR-03 | `admin_review.html` | Approve and Reject controls visible |
-| FR-04 | Rejected gateway path | Process model inspection |
-| FR-05 | Technician Worklist task | Subprocess model inspection |
-| FR-06 | `technician_assessment.html` | Form and Data Elements inspection |
-| FR-07 | `inventory_approval.html` | Conditional inventory branch inspection |
-| FR-08 | `materials_needed == true` gateway | Process model inspection |
-| FR-09 | `repair_complete.html` | Form and Data Elements inspection |
-| FR-10 | `student_confirmation.html` | Form and Finalize inspection |
-| FR-11 | `data.satisfied == false` loop | Process model inspection |
-| FR-12 | `fork_running` | New intake remained available during child execution |
-| FR-13 | `By Single Worker` | Lina could not see Renny's claimed Sync task |
-| FR-14 | `Always Available` | Renny still saw Async while Lina had it open |
-| FR-15 | Separate child instances | Instances 111209 and 111210 contained independent data |
-
----
-
-## 24. Conclusion
+## 19. Conclusion
 
 The Dormitory Maintenance Worklist System demonstrates how a continuously available request entry point can be separated from long-running request processing in CPEE. The reusable subprocess contains the full maintenance business logic, while two alternative main processes demonstrate different concurrency strategies.
 
