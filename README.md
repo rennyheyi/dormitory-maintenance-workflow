@@ -81,16 +81,3 @@ Additional process data includes the administrator decision, assessment notes, r
 - `DOCUMENTATION.md`: complete technical documentation and verified test evidence
 - `docs/images/`: process and Worklist screenshots used by the documentation
 
-## Testing
-
-The complete child process was tested through the Worklist. Main-Sync was tested with two Student users to verify single-worker task locking, and Main-Async was tested to verify concurrent form availability and independent request processing.
-
-See the [complete technical documentation](DOCUMENTATION.md) for architecture, configuration details, Sync/Async behaviour, data mappings, screenshots, and test results.
-
-## Technologies
-
-- CPEE
-- CPEE Worklist
-- HTML and CSS
-- Ruby expressions in CPEE
-- XML organisation and process models
